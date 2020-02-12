@@ -2,7 +2,23 @@ import pygame
 import time
 import math
 from adafruit_servokit import ServoKit
- 
+
+class DummyContinousServoPowerable(object):
+    def __init__(self, pin):
+        self.pin = pin
+    def __setattr__(self, key, value):
+        if key == "throttle":
+            print("[DummyContinousServo] Set motor power on pin %s to %s" % (self.pin, value))
+        else:
+            print("[DummyContinousServo] WARNING: Invalid attribute accessed: %s" % key)
+
+class DummyContinuousServo(object):
+    def __getitem__(self, item):
+        return DummyContinousServoPowerable(item)
+
+class DummyServoKit(object):
+    continuous_servo = DummyContinuousServo()
+
 ADDRESS = ("169.254.38.172", 12347)
 RGB_GREEN = (0, 255 ,0)
 RGB_BLUE = (0, 0, 255)
@@ -54,7 +70,8 @@ upJoyButton = 4
 downJoyButton = 5
 verticalaxis = 2
 
-kit = ServoKit(channels=16)
+kit = DummyServoKit()
+#kit = ServoKit(channels=16)
 
 i = 0
 new_value = 0
