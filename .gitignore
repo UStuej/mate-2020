@@ -1,3 +1,2 @@
 # Ignore personal workspace files
-*.iml
-*.xml
+.idea
