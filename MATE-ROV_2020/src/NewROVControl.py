@@ -19,20 +19,20 @@ class DummyContinuousServo(object):
 class DummyServoKit(object):
     continuous_servo = DummyContinuousServo()
 
-ADDRESS = ("169.254.38.172", 12347)
 RGB_GREEN = (0, 255 ,0)
 RGB_BLUE = (0, 0, 255)
 RGB_RED = (255, 0, 0)
 RGB_PURPLE = (130, 0, 130)
 SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 480
-RESOLUTION = (SCREEN_WIDTH,SCREEN_HEIGHT)
+RESOLUTION = (SCREEN_WIDTH, SCREEN_HEIGHT)
 JOY_X = SCREEN_WIDTH/2
 JOY_Y = SCREEN_HEIGHT/2
+POWER_MULTIPLIER = 0.6 # Multiplier to be applied to all target motor powers
 
 SECONDS_TO_FULL = 0.5
 FRAMERATE = 240
-INCREMENTS_PER_SECOND = 1/SECONDS_TO_FULL # TODO: Check this
+INCREMENTS_PER_SECOND = 1/SECONDS_TO_FULL
 INCREMENTS_PER_FRAME = INCREMENTS_PER_SECOND/FRAMERATE
 
 MOTOR_TOP_LEFT = 0 # Channel numbers
@@ -62,16 +62,17 @@ pygame.init()
 screen = pygame.display.set_mode(RESOLUTION)
 font = pygame.font.SysFont("ROV_control_font", 25)
 
-rightJoyYAxisIndex = 3
-rightJoyXAxisIndex = 4
+rightJoyYAxisIndex = 4
+rightJoyXAxisIndex = 3
 leftJoyYAxisIndex = 1
 leftJoyXAxisIndex = 0
 upJoyButton = 4
 downJoyButton = 5
-verticalaxis = 2
+verticalaxis_left = 2
+verticalaxis_right = 5
 
-kit = DummyServoKit()
-#kit = ServoKit(channels=16)
+#kit = DummyServoKit()
+kit = ServoKit(channels=16)
 
 i = 0
 new_value = 0
@@ -89,11 +90,6 @@ pi_mapping = {"top_left":MOTOR_TOP_LEFT,
               "bottom_right":MOTOR_BOTTOM_RIGHT,
               "vertical_left":MOTOR_UP_LEFT,
               "vertical_right":MOTOR_UP_RIGHT}
-
-instant_control = False # Whether or not controls will instantly reflect inputs. If False, controls will accumulate on the controls
-control_factor = 0.02 # Factor to control accumulation speed if not using instant control
-
-max_motor_percent = 1000.0 # Maximum percentage of all of the motors (0.0 being 0%, and 1.0 being 100%)
 
 def translateRange(value, old_min, old_max, new_min, new_max):
     old_range = (old_max-old_min)
@@ -151,8 +147,6 @@ def debugJoystick():
             print("    Button %i: %f" % (button, joystick.get_button(button)))
     except BaseException as error:
         print("Error while debugging joystick: %s" % error)
-    
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 def useControls(controls_dict):
     global i
@@ -166,7 +160,8 @@ def useControls(controls_dict):
     controls_dict = controls_dict.copy()
     
     for control in controls_dict.keys():
-        power = controls_dict[control]
+        power = controls_dict[control]*POWER_MULTIPLIER
+        
         new_value = power
 
         i = last_values[control]
@@ -230,7 +225,6 @@ def getControls():
             control, inverted = joymap[button]
             if inverted:
                 value *= -1
-        print("")            
             
     except ConnectionRefusedError as error:
         print("Error while getting controls: %s" % error)
@@ -247,6 +241,10 @@ max_height = screen.get_height()-extent # The height of the middle of the joysti
 running = True
 
 clock = pygame.time.Clock()
+
+# DEBUG
+#while True:
+#    debugJoystick()
 
 while running:
     for event in pygame.event.get():
@@ -403,9 +401,11 @@ while running:
 
     upJoyPos = joystick.get_button(upJoyButton)
     downJoyPos = joystick.get_button(downJoyButton)
-    verticalpos = joystick.get_axis(verticalaxis)
+    verticalpos = -1*(joystick.get_axis(verticalaxis_left)/2) + (joystick.get_axis(verticalaxis_right)/2) # New code
     
     vmotorpower = vmotorpower + upJoyPos * 0.01 + downJoyPos * -0.01 + verticalpos/4
+
+    #print(vmotorpower, upJoyPos, downJoyPos)
 
     if (vmotorpower > 1.0) :
         vmotorpower = 1.0
