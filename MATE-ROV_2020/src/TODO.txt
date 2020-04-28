@@ -1,0 +1,1 @@
+- Optimize conversion of joystick positions to motor power in NewROVControl.py
