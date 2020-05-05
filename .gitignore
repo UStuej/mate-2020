@@ -1,5 +1,5 @@
 # Ignore personal workspace files
 .idea
 .metadata
-# Not sure why this is here
-# MATE-ROV_2020/src/imgui.ini
+# Ignore the imgui configuration file
+python/src/imgui.ini
