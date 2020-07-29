@@ -9,7 +9,6 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
@@ -41,39 +40,49 @@ public class MethodTests {
 		List<MatOfPoint> contours = new ArrayList<>();
         Imgproc.findContours(edges, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
         
+        Point[] points = null;
+        Rect rect = null; // TODO MAIN OUTPUT VAR
+        
         // Check the contours
         for (int i = 0; i < contours.size(); i++) {
         	
-        	MatOfPoint temp_contour = contours.get(i);
-            MatOfPoint2f new_mat = new MatOfPoint2f(temp_contour.toArray());
-            int contourSize = (int) temp_contour.total();
+        	MatOfPoint tempContour = contours.get(i);
+            MatOfPoint2f newMat = new MatOfPoint2f(tempContour.toArray());
+            int contourSize = (int) tempContour.total();
             MatOfPoint2f approxCurve_temp = new MatOfPoint2f();
-            Imgproc.approxPolyDP(new_mat, approxCurve_temp, contourSize * 0.05, true);
+            Imgproc.approxPolyDP(newMat, approxCurve_temp, contourSize * 0.05, true);
             
-            if (approxCurve_temp.total()>5) {
+            if (approxCurve_temp.total() > 5) {
             	
-                MatOfPoint points = new MatOfPoint(approxCurve_temp.toArray());
-
-                // We then find the corners of the rectangle:
-                Rect rect = Imgproc.boundingRect(points);
-
-                // We only get the larger rectangles. – This might be not be needed I add it 
-                // When I had problem with it finding little squares.  I added the blur after
-                // this.
-//                if (rect.width> 10 && rect.height > 10) {
-                	
-                       Imgproc.rectangle(img,
-                                      new Point(rect.x, rect.y),
-                                      new Point(rect.x + rect.width, rect.y + rect.height),
-                                      new Scalar(0, 127, 255), 2);
-                       
-//                }
+                points = approxCurve_temp.toArray();
+                
+                rect = Imgproc.boundingRect(new MatOfPoint(points));
                 
             }
         	
         }
         
-        Imgcodecs.imwrite("./output/sc.png", img);
+        if (points == null || rect == null) {
+        	
+        	System.out.println("One or more of the variables is null.");
+        	
+        } else {
+        	
+        	System.out.print("[ ");
+        	
+        	for (Point p : points) {
+        		
+        		System.out.print(p.toString() + " , ");
+        		
+        	}
+        	
+        	System.out.println("]");
+        	
+        	
+//        	System.out.printf("[ ( %d , %d ) , ( %d , %d ) , ( %d , %d ) , ( %d , %d ) ]\n");
+        	System.out.println(rect.toString());
+        	
+        }
         
 	}
 
