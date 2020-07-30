@@ -10,7 +10,7 @@ public class Main {
 		
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
-		MethodTests.mpsRectDetect();
+		
 		
 		System.out.println("Everything finished successfully.");
 		

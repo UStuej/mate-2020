@@ -7,19 +7,22 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 public class MethodTests {
 	
-	public static void mpsRectDetect() {
-		
-		// Get source image
-		Mat img = Imgcodecs.imread("C:/Users/bushy/Downloads/files/files/output/green/SubwayCar3_m_75-90_73-255_0-255.jpg");
-		
+	/**
+	 * Detects a rectangle in a {@link Mat} image and returns a {@link Rect} object which defines the detected rectangle.
+	 * 
+	 * 
+	 * @param img The input image, usually of type {@code CV_8UC3}.
+	 * 
+	 * @return The {@link Rect} object which defines the detected rectangle.
+	 */
+	public static Rect mpsRectDetect(Mat img) {
+				
 		// Convert image to grayscale
 		Mat proc0 = Mat.zeros(img.size(), CvType.CV_8UC1);
 		Imgproc.cvtColor(img, proc0, Imgproc.COLOR_BGR2GRAY);
@@ -40,8 +43,7 @@ public class MethodTests {
 		List<MatOfPoint> contours = new ArrayList<>();
         Imgproc.findContours(edges, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
         
-        Point[] points = null;
-        Rect rect = null; // TODO MAIN OUTPUT VAR
+        Rect rect = null;
         
         // Check the contours
         for (int i = 0; i < contours.size(); i++) {
@@ -54,35 +56,13 @@ public class MethodTests {
             
             if (approxCurve_temp.total() > 5) {
             	
-                points = approxCurve_temp.toArray();
-                
-                rect = Imgproc.boundingRect(new MatOfPoint(points));
+                rect = Imgproc.boundingRect(new MatOfPoint(approxCurve_temp.toArray()));
                 
             }
         	
         }
         
-        if (points == null || rect == null) {
-        	
-        	System.out.println("One or more of the variables is null.");
-        	
-        } else {
-        	
-        	System.out.print("[ ");
-        	
-        	for (Point p : points) {
-        		
-        		System.out.print(p.toString() + " , ");
-        		
-        	}
-        	
-        	System.out.println("]");
-        	
-        	
-//        	System.out.printf("[ ( %d , %d ) , ( %d , %d ) , ( %d , %d ) , ( %d , %d ) ]\n");
-        	System.out.println(rect.toString());
-        	
-        }
+        return rect;
         
 	}
 
