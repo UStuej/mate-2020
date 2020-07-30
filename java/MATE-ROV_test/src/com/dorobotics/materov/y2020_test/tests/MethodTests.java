@@ -19,7 +19,7 @@ public class MethodTests {
 	 * 
 	 * @param img The input image, usually of type {@code CV_8UC3}.
 	 * 
-	 * @return The {@link Rect} object which defines the detected rectangle.
+	 * @return The {@link Rect} object which defines the detected rectangle.  Returns {@code null} if a rectangle is not found.
 	 */
 	public static Rect mpsRectDetect(Mat img) {
 				
@@ -43,6 +43,8 @@ public class MethodTests {
 		List<MatOfPoint> contours = new ArrayList<>();
         Imgproc.findContours(edges, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
         
+        // Set this variable's scope so that it
+        // can be accessed by the return statement
         Rect rect = null;
         
         // Check the contours
