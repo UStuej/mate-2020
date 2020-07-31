@@ -1,8 +1,10 @@
 package com.dorobotics.materov.y2020_test;
 
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
 import com.dorobotics.materov.y2020_test.tests.MethodTests;
 
@@ -73,13 +75,29 @@ public class Main {
 		for (short a = 0; a < imgPaths.length; a++) {
 			for (short b = 0; b < imgPaths[a].length; b++) {
 				
-				faceImgs[a][b] = Imgcodecs.imread(imgPaths[a][b]);
+				Mat img = Imgcodecs.imread(imgPaths[a][b]);
+				Mat ret = Mat.zeros(img.size(), CvType.CV_8UC1);
+				Imgproc.cvtColor(img, ret, Imgproc.COLOR_BGR2GRAY);
+				faceImgs[a][b] = ret;
 				
 			}
 		}
 		
-		// DEV assert no element or sub-element of the aforementioned element may be null
-		MethodTests.scSec(faceImgs);
+		try {
+			
+			// DEV assert no element nor sub-element of any element may be null
+			// DEV assert all images from any given element of faceImgs have identical sizes and types (type should be CV_8UC1)
+			MethodTests.scSec(faceImgs);
+			
+		} catch (IllegalArgumentException e) {
+			
+			if (e.getMessage().equals("30f64858-d36e-11ea-87d0-0242ac130003")) {
+				
+				System.err.println("[ERROR]: No valid square was found! (code: 30f64858-d36e-11ea-87d0-0242ac130003)");
+				
+			}
+			
+		}
 		
 		System.out.println("Everything finished successfully.");
 		

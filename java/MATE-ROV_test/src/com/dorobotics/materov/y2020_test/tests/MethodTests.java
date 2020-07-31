@@ -7,6 +7,7 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -14,9 +15,50 @@ import org.opencv.imgproc.Imgproc;
 
 public class MethodTests {
 	
-	public static void scSec(final Mat[][] faceImgs /* This 2D array is in the format of faceImages[faceID][colorMaskedID]. */) {
+	public static short[] scSec(final Mat[][] faceImgs /* This 2D array is in the format of faceImages[faceID][colorMaskedID]. */) throws IllegalArgumentException {
 		
+		short[] ret = null;
 		
+		// Get one of the square images
+		for (short i = 0; i < faceImgs.length; i++) {
+			
+			Mat img = faceImgs[i][0];
+			
+			if (Math.abs(img.rows() - img.cols()) < 10 /* Previous literal is a variable threshold */) {
+				
+				ret = new short[5];
+				ret[0] = i;
+				break;
+				
+			}
+			
+		}
+		
+		// Make sure a square image was found
+		if (ret == null) {
+			
+			throw new IllegalArgumentException("30f64858-d36e-11ea-87d0-0242ac130003");
+			
+		}
+		
+		short currentImgIdx = ret[0];
+		
+		for (short i = 0; i < 3; i++) {
+			
+			Mat[] imgs = faceImgs[currentImgIdx];
+			
+			for (short i2 = 0; i2 < imgs.length; i2++) {
+				
+				Mat img = imgs[i2];
+				
+				Rect rect = mpsRectDetect(img);
+				Point midpoint = new Point(rect.x + (rect.width / 2.0), rect.y - (rect.height / 2.0));
+				
+			}
+			
+		}
+		
+		return ret;
 		
 	}
 	
