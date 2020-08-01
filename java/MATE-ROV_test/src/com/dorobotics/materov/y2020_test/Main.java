@@ -91,9 +91,31 @@ public class Main {
 			
 		} catch (IllegalArgumentException e) {
 			
-			if (e.getMessage().equals("30f64858-d36e-11ea-87d0-0242ac130003")) {
+			switch (e.getMessage()) {
 				
-				System.err.println("[ERROR]: No valid square was found! (code: 30f64858-d36e-11ea-87d0-0242ac130003)");
+				case "30f64858-d36e-11ea-87d0-0242ac130003":
+					System.err.println("[ERROR]: No valid square was found! (code: 30f64858-d36e-11ea-87d0-0242ac130003)");
+				break;
+				
+				case "f030e588-1043-4c26-ab09-e20e139b20c4":
+					System.err.println("[ERROR]: One of the masked images does not contain a right colored rectangle! (code: f030e588-1043-4c26-ab09-e20e139b20c4)");
+				break;
+				
+				case "26e66660-fd52-4e1c-9de7-07881f9b8c53":
+					System.err.println("[ERROR]: One of the masked images does not contain a left colored rectangle! (code: 26e66660-fd52-4e1c-9de7-07881f9b8c53)");
+				break;
+				
+				case "75ce49f8-f4a2-47ce-9449-08d3d53853d4":
+					System.err.println("[ERROR]: One of the masked images does not contain a top colored rectangle! (code: 75ce49f8-f4a2-47ce-9449-08d3d53853d4)");
+				break;
+				
+				case "452e45b2-bc49-4d42-bb99-72148480d471":
+					System.err.println("[ERROR]: The top face's masked image does not contain either longways rectangles! (code: 452e45b2-bc49-4d42-bb99-72148480d471)");
+				break;
+				
+				default:
+					e.printStackTrace();
+				break;
 				
 			}
 			

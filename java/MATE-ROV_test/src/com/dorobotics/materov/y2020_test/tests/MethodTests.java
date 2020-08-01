@@ -10,24 +10,27 @@ import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 public class MethodTests {
 	
 	public static short[] scSec(final Mat[][] faceImgs /* This 2D array is in the format of faceImages[faceID][colorMaskedID]. */) throws IllegalArgumentException {
 		
+		// CONSTANTS
+		final int IS_SQUARE_THRESHOLD = 20;
+		
 		short[] ret = null;
+		short remainingTotal = 10;
 		
 		// Get one of the square images
 		for (short i = 0; i < faceImgs.length; i++) {
 			
 			Mat img = faceImgs[i][0];
 			
-			if (Math.abs(img.rows() - img.cols()) < 10 /* Previous literal is a variable threshold */) {
+			if (Math.abs(img.rows() - img.cols()) <= IS_SQUARE_THRESHOLD /* Previous literal is a variable threshold */) {
 				
-				ret = new short[5];
-				ret[0] = i;
+				ret = new short[] {i, -1, -1, -1, -1};
+				remainingTotal -= i;
 				break;
 				
 			}
@@ -46,15 +49,122 @@ public class MethodTests {
 		for (short i = 0; i < 3; i++) {
 			
 			Mat[] imgs = faceImgs[currentImgIdx];
+			Mat firstImg = imgs[0];
+			Point imgCenter = new Point(firstImg.width() / 2.0, firstImg.height() / 2.0);
+			boolean is1Square = Math.abs(firstImg.rows() - firstImg.cols()) <= IS_SQUARE_THRESHOLD;
+			
+			short rRectColor = -1;
 			
 			for (short i2 = 0; i2 < imgs.length; i2++) {
 				
 				Mat img = imgs[i2];
 				
 				Rect rect = mpsRectDetect(img);
+				
+				if (rect == null)
+					continue;
+				
 				Point midpoint = new Point(rect.x + (rect.width / 2.0), rect.y - (rect.height / 2.0));
 				
+				if (is1Square && (midpoint.x - imgCenter.x) >= 50.0 && Math.abs(midpoint.y - imgCenter.y) <= 20.0 /* FIXME Is this second half necessary? */) {
+					
+					rRectColor = i2;
+					break;
+					
+				} else if ((midpoint.x - imgCenter.x) >= 50.0 && Math.abs(midpoint.y - imgCenter.y) <= 20.0 /* FIXME Is this second half necessary? */) {
+					
+					rRectColor = i2;
+					break;
+					
+				}
+				
 			}
+			
+			if (rRectColor == -1) {
+				
+				throw new IllegalArgumentException("f030e588-1043-4c26-ab09-e20e139b20c4");
+				
+			}
+			
+			for (short i2 = 0; i2 < faceImgs.length; i2++) {
+				
+				Rect rect = mpsRectDetect(faceImgs[i2][rRectColor]);
+				
+				boolean is2Square = Math.abs(firstImg.rows() - firstImg.cols()) <= IS_SQUARE_THRESHOLD;
+				
+				if (rect == null)
+					continue;
+				
+				Point midpoint = new Point(rect.x + (rect.width / 2.0), rect.y - (rect.height / 2.0));
+				
+				if (is2Square && (midpoint.x - imgCenter.x) >= 50.0 && Math.abs(midpoint.y - imgCenter.y) <= 20.0 /* FIXME Is this second half necessary? */) {
+					
+					ret[i + 1] = currentImgIdx = i2;
+					remainingTotal -= i2;
+					break;
+					
+				} else if ((midpoint.x - imgCenter.x) <= -50.0 && Math.abs(midpoint.y - imgCenter.y) <= 20.0 /* FIXME Is this second half necessary? */) {
+					
+					ret[i + 1] = currentImgIdx = i2;
+					remainingTotal -= i2;
+					break;
+					
+				}
+				
+			}
+			
+			if (ret[i + 1] == -1) {
+				
+				throw new IllegalArgumentException("26e66660-fd52-4e1c-9de7-07881f9b8c53");
+				
+			}
+			
+		}
+		
+		Mat[] second = faceImgs[1];
+		Mat[] remaining = faceImgs[remainingTotal];
+		Point secondCenter = new Point(second[0].width() / 2.0, second[0].height() / 2.0);
+		Point remainingCenter = new Point(remaining[0].width() / 2.0, remaining[0].height() / 2.0);
+		short rectColor = -1;
+		
+		for (short i = 0; i < second.length; i++) {
+			
+			Rect rect = mpsRectDetect(second[i]);
+			
+			if (rect == null)
+				continue;
+			
+			Point midpoint = new Point(rect.x + (rect.width / 2.0), rect.y - (rect.height / 2.0));
+			
+			if (Math.abs(midpoint.x - secondCenter.x) <= 20.0 /* FIXME Is this first half necessary? */ && (midpoint.y - secondCenter.y) <= -50.0) {
+				
+				rectColor = i;
+				break;
+				
+			}
+			
+		}
+		
+		if (rectColor == -1) {
+			
+			throw new IllegalArgumentException("75ce49f8-f4a2-47ce-9449-08d3d53853d4");
+			
+		}
+		
+		Rect rect = mpsRectDetect(remaining[rectColor]);
+		Point midpoint = new Point(rect.x + (rect.width / 2.0), rect.y - (rect.height / 2.0));
+		
+		if (Math.abs(midpoint.x - secondCenter.x) <= 20.0 /* FIXME Is this first half necessary? */ && (midpoint.y - secondCenter.y) <= -50.0) {
+			
+			// TODO Run if top
+			
+		} else if (Math.abs(midpoint.x - secondCenter.x) <= 20.0 /* FIXME Is this first half necessary? */ && (midpoint.y - secondCenter.y) >= 50.0) {
+			
+			// TODO Run if bottom
+			
+		} else {
+			
+			throw new IllegalArgumentException("452e45b2-bc49-4d42-bb99-72148480d471");
 			
 		}
 		
