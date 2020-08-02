@@ -10,16 +10,17 @@ import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
 public class MethodTests {
 	
-	public static short[] scSec(final Mat[][] faceImgs /* This 2D array is in the format of faceImages[faceID][colorMaskedID]. */) throws IllegalArgumentException {
+	public static Mat[] scSec(final Mat[][] faceImgs /* This 2D array is in the format of faceImages[faceID][colorMaskedID]. */) throws IllegalArgumentException {
 		
 		// CONSTANTS
 		final int IS_SQUARE_THRESHOLD = 20;
 		
-		short[] ret = null;
+		short[] retIdx = null;
 		short remainingTotal = 10;
 		
 		// Get one of the square images
@@ -29,7 +30,7 @@ public class MethodTests {
 			
 			if (Math.abs(img.rows() - img.cols()) <= IS_SQUARE_THRESHOLD /* Previous literal is a variable threshold */) {
 				
-				ret = new short[] {i, -1, -1, -1, -1};
+				retIdx = new short[] {i, -1, -1, -1, -1};
 				remainingTotal -= i;
 				break;
 				
@@ -38,13 +39,13 @@ public class MethodTests {
 		}
 		
 		// Make sure a square image was found
-		if (ret == null) {
+		if (retIdx == null) {
 			
 			throw new IllegalArgumentException("30f64858-d36e-11ea-87d0-0242ac130003");
 			
 		}
 		
-		short currentImgIdx = ret[0];
+		short currentImgIdx = retIdx[0];
 		
 		for (short i = 0; i < 3; i++) {
 			
@@ -99,13 +100,13 @@ public class MethodTests {
 				
 				if (is2Square && (midpoint.x - imgCenter.x) >= 50.0 && Math.abs(midpoint.y - imgCenter.y) <= 20.0 /* FIXME Is this second half necessary? */) {
 					
-					ret[i + 1] = currentImgIdx = i2;
+					retIdx[i + 1] = currentImgIdx = i2;
 					remainingTotal -= i2;
 					break;
 					
 				} else if ((midpoint.x - imgCenter.x) <= -50.0 && Math.abs(midpoint.y - imgCenter.y) <= 20.0 /* FIXME Is this second half necessary? */) {
 					
-					ret[i + 1] = currentImgIdx = i2;
+					retIdx[i + 1] = currentImgIdx = i2;
 					remainingTotal -= i2;
 					break;
 					
@@ -113,7 +114,7 @@ public class MethodTests {
 				
 			}
 			
-			if (ret[i + 1] == -1) {
+			if (retIdx[i + 1] == -1) {
 				
 				throw new IllegalArgumentException("26e66660-fd52-4e1c-9de7-07881f9b8c53");
 				
@@ -151,16 +152,23 @@ public class MethodTests {
 			
 		}
 		
+		Mat[] ret = new Mat[5];
 		Rect rect = mpsRectDetect(remaining[rectColor]);
 		Point midpoint = new Point(rect.x + (rect.width / 2.0), rect.y - (rect.height / 2.0));
 		
+		for (short i = 0; i < 4 /* retIdx.length - 1 */; i++) {
+			
+			ret[i] = Imgcodecs.imread(String.format("./resources/subwaycar/SubwayCar%d.JPG", retIdx[i] + 1));
+			
+		}
+		
 		if (Math.abs(midpoint.x - secondCenter.x) <= 20.0 /* FIXME Is this first half necessary? */ && (midpoint.y - secondCenter.y) <= -50.0) {
 			
-			// TODO Run if top
+			// TODO Run if top (flip 180)
 			
 		} else if (Math.abs(midpoint.x - secondCenter.x) <= 20.0 /* FIXME Is this first half necessary? */ && (midpoint.y - secondCenter.y) >= 50.0) {
 			
-			// TODO Run if bottom
+			ret[4] = Imgcodecs.imread("./resources/subwaycar/SubwayCar%d.JPG", remainingTotal);
 			
 		} else {
 			
