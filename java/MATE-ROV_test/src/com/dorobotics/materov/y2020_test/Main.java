@@ -87,7 +87,13 @@ public class Main {
 			
 			// DEV assert no element nor sub-element of any element may be null
 			// DEV assert all images from any given element of faceImgs have identical sizes and types (type should be CV_8UC1)
-			MethodTests.scSec(faceImgs);
+			Mat[] imgs = MethodTests.scSec(faceImgs);
+			
+			for (short i = 0; i < imgs.length; i++) {
+				
+				Imgcodecs.imwrite(String.format("./output/sc/sc%d.png", i), imgs[i]);
+				
+			}
 			
 		} catch (IllegalArgumentException e) {
 			
@@ -113,11 +119,13 @@ public class Main {
 					System.err.println("[ERROR]: The top face's masked image does not contain either longways rectangles! (code: 452e45b2-bc49-4d42-bb99-72148480d471)");
 				break;
 				
-				default:
-					e.printStackTrace();
-				break;
+//				default:
+//					e.printStackTrace();
+//				break;
 				
 			}
+			
+			e.printStackTrace();
 			
 		}
 		

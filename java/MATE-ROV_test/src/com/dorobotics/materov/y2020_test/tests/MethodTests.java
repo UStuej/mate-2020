@@ -67,6 +67,8 @@ public class MethodTests {
 				
 				Point midpoint = new Point(rect.x + (rect.width / 2.0), rect.y - (rect.height / 2.0));
 				
+				// FIXME On a test run of this code, this section was not able to detect the right-most rectangle on SubwayCar4.JPG (the exact path for the input images in question: "C:/Users/Ben Alford/Desktop/Code/cv2testing/0_mask/output_bw-pe/*/SubwayCar4_m_95-116_171-255_0-255.jpg").
+				// This is likely due to a faulty threshold.
 				if (is1Square && (midpoint.x - imgCenter.x) >= 50.0 && Math.abs(midpoint.y - imgCenter.y) <= 20.0 /* FIXME Is this second half necessary? */) {
 					
 					rRectColor = i2;
@@ -164,7 +166,10 @@ public class MethodTests {
 		
 		if (Math.abs(midpoint.x - secondCenter.x) <= 20.0 /* FIXME Is this first half necessary? */ && (midpoint.y - secondCenter.y) <= -50.0) {
 			
-			// TODO Run if top (flip 180)
+			Mat img = Imgcodecs.imread("./resources/subwaycar/SubwayCar%d.JPG", remainingTotal);
+			Mat dst = Mat.zeros(img.size(), img.type());
+			Imgproc.warpAffine(img, dst, Imgproc.getRotationMatrix2D(remainingCenter, 180.0, 1.0), img.size());
+			ret[4] = dst;
 			
 		} else if (Math.abs(midpoint.x - secondCenter.x) <= 20.0 /* FIXME Is this first half necessary? */ && (midpoint.y - secondCenter.y) >= 50.0) {
 			
@@ -190,21 +195,21 @@ public class MethodTests {
 	 */
 	public static Rect mpsRectDetect(final Mat img) {
 				
-		// Convert image to grayscale
-		Mat proc0 = Mat.zeros(img.size(), CvType.CV_8UC1);
-		Imgproc.cvtColor(img, proc0, Imgproc.COLOR_BGR2GRAY);
+//		// Convert image to grayscale
+//		Mat proc0 = Mat.zeros(img.size(), CvType.CV_8UC1);
+//		Imgproc.cvtColor(img, proc0, Imgproc.COLOR_BGR2GRAY);
 		
 		// Blur image
-		Mat proc1 = Mat.zeros(proc0.size(), proc0.type());
-		Imgproc.GaussianBlur(proc0, proc1, new Size(5.0, 5.0), 0.0);
+		Mat proc0 = Mat.zeros(img.size(), img.type());
+		Imgproc.GaussianBlur(img, proc0, new Size(5.0, 5.0), 0.0);
 		
 		// Convert image to binary colors via a threshold (only either completely black or completely white colors)
-		Mat proc2 = Mat.zeros(proc1.size(), proc1.type());
-		Imgproc.threshold(proc1, proc2, 60.0, 255.0, Imgproc.THRESH_BINARY);
+		Mat proc1 = Mat.zeros(proc0.size(), proc0.type());
+		Imgproc.threshold(proc0, proc1, 60.0, 255.0, Imgproc.THRESH_BINARY);
 		
 		// Find edges in image
-		Mat edges = Mat.zeros(proc2.size(), CvType.CV_8UC1);
-		Imgproc.Canny(proc2, edges, 100.0, 300.0); // DEV: threshold2 = 100*3;
+		Mat edges = Mat.zeros(proc1.size(), CvType.CV_8UC1);
+		Imgproc.Canny(proc1, edges, 100.0, 300.0); // DEV: threshold2 = 100*3;
 		
 		// Find contours in image
 		List<MatOfPoint> contours = new ArrayList<>();
