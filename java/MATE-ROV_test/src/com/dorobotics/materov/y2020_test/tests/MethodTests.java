@@ -54,7 +54,6 @@ public class MethodTests {
 			
 			Mat[] imgs = faceImgs[currentImgIdx];
 			Mat firstImg = imgs[0];
-			Point imgCenter = new Point(firstImg.width() / 2.0, firstImg.height() / 2.0);
 			boolean is1Square = Math.abs(firstImg.rows() - firstImg.cols()) <= IS_SQUARE_THRESHOLD;
 			
 			short rRectColor = -1;
@@ -68,7 +67,7 @@ public class MethodTests {
 				if (rect == null)
 					continue;
 				
-				Point midpoint = new Point(rect.x + (rect.width / 2.0), rect.y - (rect.height / 2.0));
+				Point midpoint = new Point(rect.x + (rect.width / 2.0), rect.y + (rect.height / 2.0));
 				
 				// dFIXME On a test run of this code, this section was not able to detect the right-most rectangle on SubwayCar4.JPG (the exact path for the input images in question: "C:/Users/Ben Alford/Desktop/Code/cv2testing/0_mask/output_bw-pe/*/SubwayCar4_m_95-116_171-255_0-255.jpg").
 				// This is likely due to a faulty threshold.
@@ -102,15 +101,15 @@ public class MethodTests {
 				if (rect == null)
 					continue;
 				
-				Point midpoint = new Point(rect.x + (rect.width / 2.0), rect.y - (rect.height / 2.0));
+				Point midpoint = new Point(rect.x + (rect.width / 2.0), rect.y + (rect.height / 2.0));
 				
-				if (is2Square && (midpoint.x / img.cols()) <= SQUARE_HORIZ_OFFSET && Math.abs(midpoint.y - imgCenter.y) <= 20.0 /* dFIXME Is this second half necessary? */) {
+				if (is2Square && (midpoint.x / img.cols()) <= SQUARE_HORIZ_OFFSET/* && Math.abs(midpoint.y - imgCenter.y) <= 20.0 *//* dFIXME Is this second half necessary? */) {
 					
 					retIdx[i + 1] = currentImgIdx = i2;
 					remainingTotal -= i2;
 					break;
 					
-				} else if ((midpoint.x / img.cols()) <= RECT_HORIZ_OFFSET && Math.abs(midpoint.y - imgCenter.y) <= 20.0 /* dFIXME Is this second half necessary? */) {
+				} else if ((midpoint.x / img.cols()) <= RECT_HORIZ_OFFSET/* && Math.abs(midpoint.y - imgCenter.y) <= 20.0 *//* dFIXME Is this second half necessary? */) {
 					
 					retIdx[i + 1] = currentImgIdx = i2;
 					remainingTotal -= i2;
@@ -130,7 +129,6 @@ public class MethodTests {
 		
 		Mat[] second = faceImgs[1];
 		Mat[] remaining = faceImgs[remainingTotal];
-//		Point secondCenter = new Point(second[0].width() / 2.0, second[0].height() / 2.0); FIXME
 		Point remainingCenter = new Point(remaining[0].width() / 2.0, remaining[0].height() / 2.0);
 		short rectColor = -1;
 		
@@ -142,7 +140,7 @@ public class MethodTests {
 			if (rect == null)
 				continue;
 			
-			Point midpoint = new Point(rect.x + (rect.width / 2.0), rect.y - (rect.height / 2.0));
+			Point midpoint = new Point(rect.x + (rect.width / 2.0), rect.y + (rect.height / 2.0));
 			
 			if (/*Math.abs(midpoint.x - secondCenter.x) <= 20.0 *//* dFIXME Is this first half necessary? *//* && */(midpoint.y / img.rows()) <= RECT_VERT_OFFSET) {
 				
@@ -161,7 +159,7 @@ public class MethodTests {
 		
 		Mat[] ret = new Mat[5];
 		Rect rect = mpsRectDetect(remaining[rectColor]);
-		Point midpoint = new Point(rect.x + (rect.width / 2.0), rect.y - (rect.height / 2.0));
+		Point midpoint = new Point(rect.x + (rect.width / 2.0), rect.y + (rect.height / 2.0));
 		
 		for (short i = 0; i < 4 /* retIdx.length - 1 */; i++) {
 			
@@ -171,14 +169,14 @@ public class MethodTests {
 		
 		if (/*Math.abs(midpoint.x - secondCenter.x) <= 20.0 *//* dFIXME Is this first half necessary? *//* && */(midpoint.y / remaining[0].rows()) <= RECT_VERT_OFFSET) {
 			
-			Mat img = Imgcodecs.imread("./resources/subwaycar/SubwayCar%d.JPG", remainingTotal);
+			Mat img = Imgcodecs.imread(String.format("./resources/subwaycar/SubwayCar%d.JPG", remainingTotal + 1));
 			Mat dst = Mat.zeros(img.size(), img.type());
 			Imgproc.warpAffine(img, dst, Imgproc.getRotationMatrix2D(remainingCenter, 180.0, 1.0), img.size());
 			ret[4] = dst;
 			
 		} else if (/*Math.abs(midpoint.x - secondCenter.x) <= 20.0 *//* dFIXME Is this first half necessary? *//* && */(midpoint.y / remaining[0].rows()) >= (1.0 - RECT_VERT_OFFSET)) {
 			
-			ret[4] = Imgcodecs.imread("./resources/subwaycar/SubwayCar%d.JPG", remainingTotal);
+			ret[4] = Imgcodecs.imread(String.format("./resources/subwaycar/SubwayCar%d.JPG", remainingTotal + 1));
 			
 		} else {
 			
