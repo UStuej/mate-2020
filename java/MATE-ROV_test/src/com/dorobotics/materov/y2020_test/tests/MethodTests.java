@@ -19,16 +19,19 @@ public class MethodTests {
 		
 		// CONSTANTS
 		final int IS_SQUARE_THRESHOLD = 20;
+		final double SQUARE_HORIZ_OFFSET = 1.0 / 4.0;
+		final double RECT_HORIZ_OFFSET = 1.0 / 4.0;
+		final double RECT_VERT_OFFSET = 1.0 / 4.0;
 		
 		short[] retIdx = null;
-		short remainingTotal = 10;
+		short remainingTotal = 10; // = 0 + 1 + 2 + 3 + 4
 		
 		// Get one of the square images
 		for (short i = 0; i < faceImgs.length; i++) {
 			
 			Mat img = faceImgs[i][0];
 			
-			if (Math.abs(img.rows() - img.cols()) <= IS_SQUARE_THRESHOLD /* Previous literal is a variable threshold */) {
+			if (Math.abs(img.rows() - img.cols()) <= IS_SQUARE_THRESHOLD) {
 				
 				retIdx = new short[] {i, -1, -1, -1, -1};
 				remainingTotal -= i;
@@ -67,14 +70,14 @@ public class MethodTests {
 				
 				Point midpoint = new Point(rect.x + (rect.width / 2.0), rect.y - (rect.height / 2.0));
 				
-				// FIXME On a test run of this code, this section was not able to detect the right-most rectangle on SubwayCar4.JPG (the exact path for the input images in question: "C:/Users/Ben Alford/Desktop/Code/cv2testing/0_mask/output_bw-pe/*/SubwayCar4_m_95-116_171-255_0-255.jpg").
+				// dFIXME On a test run of this code, this section was not able to detect the right-most rectangle on SubwayCar4.JPG (the exact path for the input images in question: "C:/Users/Ben Alford/Desktop/Code/cv2testing/0_mask/output_bw-pe/*/SubwayCar4_m_95-116_171-255_0-255.jpg").
 				// This is likely due to a faulty threshold.
-				if (is1Square && (midpoint.x - imgCenter.x) >= 50.0 && Math.abs(midpoint.y - imgCenter.y) <= 20.0 /* FIXME Is this second half necessary? */) {
+				if (is1Square && (midpoint.x / firstImg.cols()) >= (1.0 - SQUARE_HORIZ_OFFSET)/* && Math.abs(midpoint.y - imgCenter.y) <= 20.0 *//* dFIXME Is this second half necessary? */) {
 					
 					rRectColor = i2;
 					break;
 					
-				} else if ((midpoint.x - imgCenter.x) >= 50.0 && Math.abs(midpoint.y - imgCenter.y) <= 20.0 /* FIXME Is this second half necessary? */) {
+				} else if ((midpoint.x / firstImg.cols()) >= (1.0 - RECT_HORIZ_OFFSET)/* && Math.abs(midpoint.y - imgCenter.y) <= 20.0 *//* dFIXME Is this second half necessary? */) {
 					
 					rRectColor = i2;
 					break;
@@ -91,7 +94,8 @@ public class MethodTests {
 			
 			for (short i2 = 0; i2 < faceImgs.length; i2++) {
 				
-				Rect rect = mpsRectDetect(faceImgs[i2][rRectColor]);
+				Mat img = faceImgs[i2][rRectColor];
+				Rect rect = mpsRectDetect(img);
 				
 				boolean is2Square = Math.abs(firstImg.rows() - firstImg.cols()) <= IS_SQUARE_THRESHOLD;
 				
@@ -100,13 +104,13 @@ public class MethodTests {
 				
 				Point midpoint = new Point(rect.x + (rect.width / 2.0), rect.y - (rect.height / 2.0));
 				
-				if (is2Square && (midpoint.x - imgCenter.x) >= 50.0 && Math.abs(midpoint.y - imgCenter.y) <= 20.0 /* FIXME Is this second half necessary? */) {
+				if (is2Square && (midpoint.x / img.cols()) <= SQUARE_HORIZ_OFFSET && Math.abs(midpoint.y - imgCenter.y) <= 20.0 /* dFIXME Is this second half necessary? */) {
 					
 					retIdx[i + 1] = currentImgIdx = i2;
 					remainingTotal -= i2;
 					break;
 					
-				} else if ((midpoint.x - imgCenter.x) <= -50.0 && Math.abs(midpoint.y - imgCenter.y) <= 20.0 /* FIXME Is this second half necessary? */) {
+				} else if ((midpoint.x / img.cols()) <= RECT_HORIZ_OFFSET && Math.abs(midpoint.y - imgCenter.y) <= 20.0 /* dFIXME Is this second half necessary? */) {
 					
 					retIdx[i + 1] = currentImgIdx = i2;
 					remainingTotal -= i2;
@@ -126,20 +130,21 @@ public class MethodTests {
 		
 		Mat[] second = faceImgs[1];
 		Mat[] remaining = faceImgs[remainingTotal];
-		Point secondCenter = new Point(second[0].width() / 2.0, second[0].height() / 2.0);
+//		Point secondCenter = new Point(second[0].width() / 2.0, second[0].height() / 2.0); FIXME
 		Point remainingCenter = new Point(remaining[0].width() / 2.0, remaining[0].height() / 2.0);
 		short rectColor = -1;
 		
 		for (short i = 0; i < second.length; i++) {
 			
-			Rect rect = mpsRectDetect(second[i]);
+			Mat img = second[i];
+			Rect rect = mpsRectDetect(img);
 			
 			if (rect == null)
 				continue;
 			
 			Point midpoint = new Point(rect.x + (rect.width / 2.0), rect.y - (rect.height / 2.0));
 			
-			if (Math.abs(midpoint.x - secondCenter.x) <= 20.0 /* FIXME Is this first half necessary? */ && (midpoint.y - secondCenter.y) <= -50.0) {
+			if (/*Math.abs(midpoint.x - secondCenter.x) <= 20.0 *//* dFIXME Is this first half necessary? *//* && */(midpoint.y / img.rows()) <= RECT_VERT_OFFSET) {
 				
 				rectColor = i;
 				break;
@@ -164,14 +169,14 @@ public class MethodTests {
 			
 		}
 		
-		if (Math.abs(midpoint.x - secondCenter.x) <= 20.0 /* FIXME Is this first half necessary? */ && (midpoint.y - secondCenter.y) <= -50.0) {
+		if (/*Math.abs(midpoint.x - secondCenter.x) <= 20.0 *//* dFIXME Is this first half necessary? *//* && */(midpoint.y / remaining[0].rows()) <= RECT_VERT_OFFSET) {
 			
 			Mat img = Imgcodecs.imread("./resources/subwaycar/SubwayCar%d.JPG", remainingTotal);
 			Mat dst = Mat.zeros(img.size(), img.type());
 			Imgproc.warpAffine(img, dst, Imgproc.getRotationMatrix2D(remainingCenter, 180.0, 1.0), img.size());
 			ret[4] = dst;
 			
-		} else if (Math.abs(midpoint.x - secondCenter.x) <= 20.0 /* FIXME Is this first half necessary? */ && (midpoint.y - secondCenter.y) >= 50.0) {
+		} else if (/*Math.abs(midpoint.x - secondCenter.x) <= 20.0 *//* dFIXME Is this first half necessary? *//* && */(midpoint.y / remaining[0].rows()) >= (1.0 - RECT_VERT_OFFSET)) {
 			
 			ret[4] = Imgcodecs.imread("./resources/subwaycar/SubwayCar%d.JPG", remainingTotal);
 			
