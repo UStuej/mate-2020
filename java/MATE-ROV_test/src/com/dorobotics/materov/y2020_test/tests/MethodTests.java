@@ -242,5 +242,29 @@ public class MethodTests {
         return rect;
         
 	}
+	
+	public static Mat netFromImgs(final Mat[] faceImgs /* Array of CV_8UC3 in the format of the returned array from #scSec */) {
+		
+		/* TODO
+		 
+		 Pseudo-code (assuming top-left origin):
+		 
+		 1. Size images appropriately to Mat array sFaceImgs
+		 	a. faceImgs[0:3] all have same height (y-axis)
+		 	b. faceImgs[4] has same width (x-axis) as faceImgs[1]
+		 2. Create blank CV_8UC3 Mat with width ((sum of sFaceImgs[0:3] width)) and width ((height of sFaceImgs[0:3] (prob. use sFaceImgs[0] since it doesn't matter anyway) + height of sFaceImgs[4]))
+		 3. Set sFaceImgs[0] in position (0, blank.height - sFaceImgs[0].height)
+		 4. Set sFaceImgs[1] in position (sFaceImgs[0].width, blank.height - sFaceImgs[0].height)
+		 5. Set sFaceImgs[2] in position (sFaceImgs[0].width + sFaceImgs[1].width, blank.height - sFaceImgs[0].height)
+		 6. Set sFaceImgs[3] in position ({sFaceImgs[0].width + sFaceImgs[1].width + sFaceImgs[2].width}, blank.height - sFaceImgs[0].height)
+		 7. Set sFaceImgs[4] in position (sFaceImgs[0].width, 0)
+		 8. Return (now filled) blank image
+		 
+		 */
+		
+		
+		return null;
+		
+	}
 
 }
