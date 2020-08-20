@@ -296,7 +296,7 @@ public class MethodTests {
 			} else {
 				
 				Mat dst = new Mat(0, 0, CvType.CV_8UC3);
-				Imgproc.resize(faceImgs[4], dst, new Size(tWidth, 0.0), 0.0, tWidth / (double) faceImgs[4].height());
+				Imgproc.resize(faceImgs[4], dst, new Size(tWidth, 0.0), 0.0, tWidth / (double) faceImgs[4].width());
 				sFaceImgs[4] = dst;
 				
 			}
