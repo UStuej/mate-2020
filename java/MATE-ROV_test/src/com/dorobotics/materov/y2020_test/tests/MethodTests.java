@@ -256,16 +256,17 @@ public class MethodTests {
 		 3. Set sFaceImgs[0] in position (0, blank.height - sFaceImgs[0].height)
 		 4. Set sFaceImgs[1] in position (sFaceImgs[0].width, blank.height - sFaceImgs[0].height)
 		 5. Set sFaceImgs[2] in position (sFaceImgs[0].width + sFaceImgs[1].width, blank.height - sFaceImgs[0].height)
-		 6. Set sFaceImgs[3] in position ({sFaceImgs[0].width + sFaceImgs[1].width + sFaceImgs[2].width}, blank.height - sFaceImgs[0].height)
+		 6. Set sFaceImgs[3] in position (sFaceImgs[0].width + sFaceImgs[1].width + sFaceImgs[2].width, blank.height - sFaceImgs[0].height)
 		 7. Set sFaceImgs[4] in position (sFaceImgs[0].width, 0)
 		 8. Return (now filled) blank image
 		 
 		 */
 		
 		
+		Mat[] sFaceImgs = new Mat[5];
+		
 		// Get the minimum height of the bottom row of images
 		int bMinHeight = Math.min(Math.min(Math.min(faceImgs[0].height(), faceImgs[1].height()), faceImgs[2].height()), faceImgs[3].height());
-		Mat[] sFaceImgs = new Mat[5];
 		
 		// Scale the images to the same height (defined above)
 		for (short i = 0; i < 4; i++) {
@@ -276,8 +277,8 @@ public class MethodTests {
 				
 			} else {
 				
-				Mat dst = new Mat(0, 0, CvType.CV_8UC3);
-				Imgproc.resize(faceImgs[i], dst, new Size(0.0, bMinHeight), bMinHeight / (double) faceImgs[i].height());
+				Mat dst = Mat.zeros(bMinHeight, Math.round(faceImgs[i].width() * (bMinHeight / (float) faceImgs[i].height())), CvType.CV_8UC3);
+				Imgproc.resize(faceImgs[i], dst, dst.size());
 				sFaceImgs[i] = dst;
 				
 			}
@@ -285,25 +286,44 @@ public class MethodTests {
 		}
 		
 		// Scale the top-most image to the same width as the one below it
+		int tWidth = sFaceImgs[1].width();
+		
+		if (faceImgs[4].width() == tWidth) {
+			
+			sFaceImgs[4] = faceImgs[4];
+			
+		} else {
+			
+			Mat dst = Mat.zeros(Math.round(faceImgs[4].height() * (tWidth / (float) faceImgs[4].width())), tWidth, CvType.CV_8UC3);
+			Imgproc.resize(faceImgs[4], dst, dst.size());
+			sFaceImgs[4] = dst;
+			
+		}
+		
+		
+		// Initialize the net (output) image with the correct size and type
+		Mat net = Mat.zeros(sFaceImgs[0].height() + sFaceImgs[4].height(), sFaceImgs[0].width() + sFaceImgs[1].width() + sFaceImgs[2].width() + sFaceImgs[3].width(), CvType.CV_8UC3);
+		
+		sFaceImgs[0].copyTo(net.submat(new Rect(0, net.height() - bMinHeight, sFaceImgs[0].width(), bMinHeight)));
+		
+		// Insert the bottom row of images into the net
 		{
 			
-			int tWidth = sFaceImgs[1].width();
+			int netHeight = net.height();
+			int bMinY = netHeight - bMinHeight;
+			int xDisSum = 0;
 			
-			if (faceImgs[4].width() == tWidth) {
+			for (short i = 0; i < 4; i++) {
 				
-				sFaceImgs[4] = faceImgs[4];
-				
-			} else {
-				
-				Mat dst = new Mat(0, 0, CvType.CV_8UC3);
-				Imgproc.resize(faceImgs[4], dst, new Size(tWidth, 0.0), 0.0, tWidth / (double) faceImgs[4].width());
-				sFaceImgs[4] = dst;
+				sFaceImgs[i].copyTo(net.submat(new Rect(xDisSum, bMinY, sFaceImgs[i].width(), bMinHeight)));
+				xDisSum += sFaceImgs[i].width();
 				
 			}
 			
 		}
 		
-		Mat net = Mat.zeros(sFaceImgs[0].height() + sFaceImgs[4].height(), sFaceImgs[0].width() + sFaceImgs[1].width() + sFaceImgs[2].width() + sFaceImgs[3].width(), CvType.CV_8UC3);
+		// Insert the top-most image into the net
+		sFaceImgs[4].copyTo(net.submat(new Rect(sFaceImgs[0].width(), 0, tWidth, sFaceImgs[4].height())));
 		
 		return net;
 		

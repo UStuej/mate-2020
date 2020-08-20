@@ -89,11 +89,14 @@ public class Main {
 			// DEV assert all images from any given element of faceImgs have identical sizes and types (type should be CV_8UC1)
 			Mat[] imgs = MethodTests.scSec(faceImgs);
 			
-			for (short i = 0; i < imgs.length; i++) {
-				
-				Imgcodecs.imwrite(String.format("./output/sc/sc%d.png", i), imgs[i]);
-				
-			}
+//			for (short i = 0; i < imgs.length; i++) {
+//				
+//				Imgcodecs.imwrite(String.format("./output/sc/sc%d.png", i), imgs[i]);
+//				
+//			}
+			
+			Mat net = MethodTests.netFromImgs(imgs);
+			Imgcodecs.imwrite("./output/scnet.png", net);
 			
 		} catch (IllegalArgumentException e) {
 			
