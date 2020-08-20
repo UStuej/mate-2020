@@ -243,7 +243,7 @@ public class MethodTests {
         
 	}
 	
-	public static Mat netFromImgs(final Mat[] faceImgs /* Array of CV_8UC3 in the format of the returned array from #scSec */) {
+	public static Mat netFromImgs(final Mat[] faceImgs /* Array of CV_8UC3 Mats in the format of the returned array from #scSec */) {
 		
 		/* TODO
 		 
@@ -263,7 +263,49 @@ public class MethodTests {
 		 */
 		
 		
-		return null;
+		// Get the minimum height of the bottom row of images
+		int bMinHeight = Math.min(Math.min(Math.min(faceImgs[0].height(), faceImgs[1].height()), faceImgs[2].height()), faceImgs[3].height());
+		Mat[] sFaceImgs = new Mat[5];
+		
+		// Scale the images to the same height (defined above)
+		for (short i = 0; i < 4; i++) {
+			
+			if (faceImgs[i].height() == bMinHeight) {
+				
+				sFaceImgs[i] = faceImgs[i];
+				
+			} else {
+				
+				Mat dst = new Mat(0, 0, CvType.CV_8UC3);
+				Imgproc.resize(faceImgs[i], dst, new Size(0.0, bMinHeight), bMinHeight / (double) faceImgs[i].height());
+				sFaceImgs[i] = dst;
+				
+			}
+			
+		}
+		
+		// Scale the top-most image to the same width as the one below it
+		{
+			
+			int tWidth = sFaceImgs[1].width();
+			
+			if (faceImgs[4].width() == tWidth) {
+				
+				sFaceImgs[4] = faceImgs[4];
+				
+			} else {
+				
+				Mat dst = new Mat(0, 0, CvType.CV_8UC3);
+				Imgproc.resize(faceImgs[4], dst, new Size(tWidth, 0.0), 0.0, tWidth / (double) faceImgs[4].height());
+				sFaceImgs[4] = dst;
+				
+			}
+			
+		}
+		
+		Mat net = Mat.zeros(sFaceImgs[0].height() + sFaceImgs[4].height(), sFaceImgs[0].width() + sFaceImgs[1].width() + sFaceImgs[2].width() + sFaceImgs[3].width(), CvType.CV_8UC3);
+		
+		return net;
 		
 	}
 
